@@ -382,6 +382,52 @@ input[type="number"] {
   .gauge-row { gap: 12px; }
 }
 
+
+/* ===== MOBILE FORCE SCALE (FINAL FIX) ===== */
+@media (max-width: 640px) {
+
+  html { font-size: 18px; }
+
+  body { padding: 12px; }
+
+  .page-wrap { max-width: 100%; }
+
+  .header-title { font-size: 1.1rem; }
+  .header-sub { font-size: 0.75rem; }
+
+  input[type="number"] {
+    font-size: 1.2rem;
+    padding: 16px 12px;
+  }
+
+  .input-badge { font-size: 0.85rem; }
+
+  .btn-calc {
+    height: 58px;
+    font-size: 1rem;
+  }
+
+  .btn-reset {
+    height: 50px;
+    font-size: 0.95rem;
+  }
+
+  .result-val { font-size: 1.5rem; }
+  .result-name { font-size: 0.95rem; }
+  .result-msg { font-size: 0.8rem; }
+
+  .warn-body { font-size: 0.9rem; }
+
+  .meter-svg { transform: scale(1.25); }
+
+  .gauge-reading { font-size: 20px; }
+  .gauge-sub { font-size: 11px; }
+
+  .card { padding: 14px; }
+
+  .gauge-row { gap: 16px; }
+}
+
 </style>
 </head>
 <body>
