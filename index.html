@@ -344,6 +344,44 @@ input[type="number"].error-state { background: var(--red-bg); color: var(--red);
   text-anchor: middle;
   dominant-baseline: middle;
 }
+
+/* === PRO UX Enhancements (non-breaking) === */
+html { font-size: clamp(15px, 2.2vw, 17px); }
+
+.input-row {
+  border: 1.8px solid var(--border);
+  border-radius: 12px;
+  min-height: 50px;
+  background: var(--surface);
+}
+.input-row:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(14,165,233,0.15);
+}
+input[type="number"] {
+  font-size: 1.05rem;
+  padding: 14px;
+}
+.btn-calc {
+  height: 52px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border-radius: 12px;
+}
+.meter-svg { transform: scale(1.12); }
+.gauge-reading { font-size: 17px; }
+.gauge-sub { font-size: 10px; }
+.result-val { font-size: 1.3rem; }
+
+@media (max-width: 640px) {
+  .header { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .grid { grid-template-columns: 1fr; }
+  .card { padding: 16px; }
+  .btn-calc { height: 56px; }
+  input[type="number"] { font-size: 1.15rem; }
+  .gauge-row { gap: 12px; }
+}
+
 </style>
 </head>
 <body>
@@ -356,7 +394,7 @@ input[type="number"].error-state { background: var(--red-bg); color: var(--red);
       <div class="logo-icon"><i class="fas fa-satellite-dish"></i></div>
       <div>
         <div class="header-title">Fiber Power Meter</div>
-        <div class="header-sub">FTTH · Tecsycom · dBm Analyzer</div>
+        <div class="header-sub">FTTH · Perú Fibra · dBm Analyzer</div>
       </div>
     </div>
     <div class="author-tag">Michell Sulca Valenzuela</div>
@@ -496,6 +534,11 @@ input[type="number"].error-state { background: var(--red-bg); color: var(--red);
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+
+function vibrate(ms = 40){
+  if (navigator.vibrate) navigator.vibrate(ms);
+}
+
   const form = document.getElementById('degradationForm');
   const potenciaCTOInput = document.getElementById('potenciaCTO');
   const potenciaONTInput = document.getElementById('potenciaONT');
@@ -637,6 +680,7 @@ document.addEventListener('DOMContentLoaded', function() {
     calculateBtn.disabled = true;
     setStatus('Procesando mediciones…', false);
 
+    vibrate();
     setTimeout(function() {
       calculateResults(ctoPower, ontPower);
       loadingSpinner.style.display = 'none';
