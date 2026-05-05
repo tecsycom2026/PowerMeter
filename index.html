@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Calculadora de Degradación</title>
+    <!-- Replace Bootstrap with Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Add custom styles for futuristic theme -->
+    <style id="app-style">
+        :root {
+            --primary-dark: #f8f0e3;        /* light pastel beige, was #0a0e17 */
+            --secondary-dark: #f2e9e1;      /* softer pastel tone, was #1a2234 */
+            --accent: #a8dadc;              /* pastel blue, was #00eeff */
+            --accent-glow: rgba(168, 218, 220, 0.4); /* was rgba(0, 238, 255, 0.4) */
+            --text-primary: #333333;        /* dark gray text, was #e6f1ff */
+            --text-secondary: #666666;      /* medium gray text, was #a3b9cc */
+            --success: #b2f2bb;             /* light pastel green, was #00ff9d */
+            --success-glow: rgba(178, 242, 187, 0.4); /* was rgba(0, 255, 157, 0.4) */
+            --warning: #ffe5a9;             /* light pastel yellow/orange, was #ffcc00 */
+            --warning-glow: rgba(255, 229, 169, 0.4); /* was rgba(255, 204, 0, 0.4) */
+            --danger: #ffb3c1;              /* light pastel pink, was #ff3366 */
+            --danger-glow: rgba(255, 179, 193, 0.4); /* was rgba(255, 51, 102, 0.4) */
+            --reset-color: #e0b1cb;         /* pastel purple, was #ff00c8 */
+            --reset-glow: rgba(224, 177, 203, 0.4); /* was rgba(255, 0, 200, 0.4) */
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f8f0e3 0%, #ffffff 100%);
+            color: var(--text-primary);
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        /* Futuristic container */
+        .modern-container {
+            background: #fdfbf7;
+            border-radius: 10px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(168, 218, 220, 0.5);
+            backdrop-filter: blur(4px);
+        }
+        
+        /* Futuristic input styling */
+        .modern-input {
+            background: #fefbec;
+            color: var(--text-primary);
+            border: 1px solid var(--accent);
+            box-shadow: 0 0 5px var(--accent-glow);
+            transition: all 0.3s ease;
+        }
+        
+        .modern-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 15px var(--accent-glow);
+            outline: none;
+        }
+        
+        .modern-input::placeholder {
+            color: var(--text-secondary);
+        }
+        
+        /* Futuristic button */
+        .modern-button {
+            background: linear-gradient(45deg, #a8dadc, #fcbf49);
+            color: #333;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px;
+            border: none;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 10px var(--accent-glow);
+            transition: all 0.3s ease;
+        }
+        
+        .modern-button:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+        
+        .modern-button:active {
+            transform: scale(0.97);
+        }
+        
+        /* Futuristic spinner */
+        .modern-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid rgba(0, 238, 255, 0.1);
+            border-top: 2px solid var(--accent);
+            box-shadow: 0 0 10px var(--accent-glow);
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Neumorphic result items */
+        .result-item {
+            background: var(--secondary-dark);
+            box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1), 
+                       -5px -5px 10px rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+            margin-bottom: 15px;
+            padding: 15px;
+            transition: all 0.3s ease;
+            border-left-width: 4px;
+        }
+        
+        .success-item {
+            border-left-color: var(--success);
+            box-shadow: 0 0 10px var(--success-glow);
+        }
+        
+        .warning-item {
+            border-left-color: var(--warning);
+            box-shadow: 0 0 10px var(--warning-glow);
+        }
+        
+        .danger-item {
+            border-left-color: var(--danger);
+            box-shadow: 0 0 10px var(--danger-glow);
+        }
+        
+        /* Enhance fade-in animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.7s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        }
+        
+        /* Reset button styles */
+        #resetBtn {
+            background: linear-gradient(45deg, #e0b1cb, #f7cad0);
+            box-shadow: 0 0 10px var(--reset-glow);
+            color: #333;
+            transition: all 0.3s ease;
+        }
+        
+        #resetBtn:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 20px var(--reset-glow);
+        }
+        
+        /* Update input styling */
+        input[type="number"] {
+            background: #fefbec;
+            color: var(--text-primary);
+            border: 1px solid var(--accent);
+            box-shadow: 0 0 5px var(--accent-glow);
+            padding: 8px 12px;
+            transition: all 0.3s ease;
+        }
+        
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+        
+        /* Update general button styling */
+        button {
+            background: linear-gradient(45deg, #a8dadc, #fcbf49);
+            color: #333;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 16px;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+        
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+        
+        button:active {
+            transform: scale(0.97);
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="p-5 font-sans">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row gap-6">
+        <!-- Left column with form and results -->
+        <div class="w-full md:w-1/2 modern-container p-6">
+            <h2 class="text-center text-3xl font-semibold text-blue-300 mb-6 pb-4 border-b border-blue-500/30" style="font-family: 'Orbitron', monospace; letter-spacing: 2px; text-shadow: 0 0 5px rgba(168, 218, 220, 0.7);">
+                Calcular Degradación
+            </h2>
+            
+            <!-- Add author name below the title -->
+            <div class="text-right text-gray-500 text-sm italic mb-4" style="margin-top: -20px;">
+                Michell Sulca Valenzuela
+            </div>
+            
+            <form id="degradationForm">
+                <div class="mb-4">
+                    <div class="flex rounded-md shadow-sm">
+                        <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-blue-400/40 bg-blue-900/70 text-blue-100 font-semibold w-32">Potencia CTO</span>
+                        <input type="number" class="modern-input flex-1 block w-full rounded-none border px-3 py-2" id="potenciaCTO" placeholder="-00.00" step="0.01" required>
+                        <span class="inline-flex items-center px-3 rounded-r-md border border-l-0 border-blue-400/40 bg-blue-800/30 text-black">dBm</span>
+                    </div>
+                    <div class="text-red-400 text-sm mt-1 hidden" id="ctoPowerError"></div>
+                </div>
+                
+                <div class="mb-6">
+                    <div class="flex rounded-md shadow-sm">
+                        <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-blue-400/40 bg-blue-900/70 text-blue-100 font-semibold w-32">Potencia ONT</span>
+                        <input type="number" class="modern-input flex-1 block w-full rounded-none border px-3 py-2" id="potenciaONT" placeholder="-00.00" step="0.01" required>
+                        <span class="inline-flex items-center px-3 rounded-r-md border border-l-0 border-blue-400/40 bg-blue-800/30 text-black">dBm</span>
+                    </div>
+                    <div class="text-red-400 text-sm mt-1 hidden" id="ontPowerError"></div>
+                </div>
+                
+                <div>
+                    <button type="submit" class="modern-button w-full py-2 px-4 rounded shadow transition duration-200" id="calculateBtn">
+                        <div class="modern-spinner hidden mr-2 inline-block" id="loadingSpinner"></div>
+                        <span>Calcular</span>
+                    </button>
+                </div>
+            </form>
+            
+            <div class="mt-8 hidden" id="resultsContainer">
+                <!-- Results in a single column -->
+                <div class="result-item" id="ctoResultItem">
+                    <div class="flex justify-between items-center">
+                        <div class="font-semibold">Potencia CTO:</div>
+                        <div class="text-lg font-medium" id="ctoResultValue"></div>
+                    </div>
+                    <div id="ctoResultMessage" class="mt-2 text-sm"></div>
+                </div>
+                
+                <div class="result-item" id="ontResultItem">
+                    <div class="flex justify-between items-center">
+                        <div class="font-semibold">Potencia ONT:</div>
+                        <div class="text-lg font-medium" id="ontResultValue"></div>
+                    </div>
+                    <div id="ontResultMessage" class="mt-2 text-sm"></div>
+                </div>
+                
+                <div class="result-item" id="degradationResultItem">
+                    <div class="flex justify-between items-center">
+                        <div class="font-semibold">Degradación:</div>
+                        <div class="text-lg font-medium" id="degradationResultValue"></div>
+                    </div>
+                </div>
+                
+                <div class="mt-5">
+                    <button type="button" class="w-full py-2 px-4 rounded shadow" id="resetBtn">Reiniciar</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right column for warnings - always visible -->
+        <div class="w-full md:w-1/2 modern-container p-6">
+            <h3 class="text-amber-700 font-semibold text-lg mb-4 pb-2 border-b border-amber-400/30" style="font-family: 'Orbitron', monospace;">
+                Advertencias y Acciones
+            </h3>
+            <div id="warningsContainer" class="bg-yellow-50 border-2 border-amber-400 rounded-md p-4 min-h-[200px]">
+                <!-- Warnings will be added here dynamically -->
+                <div class="text-amber-700 text-center italic">
+                    Los resultados y advertencias aparecerán aquí después del cálculo
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Updated script -->
+    <script id="app-script">
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get DOM elements
+            const form = document.getElementById('degradationForm');
+            const potenciaCTOInput = document.getElementById('potenciaCTO');
+            const potenciaONTInput = document.getElementById('potenciaONT');
+            const calculateBtn = document.getElementById('calculateBtn');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const resetBtn = document.getElementById('resetBtn');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const warningsContainer = document.getElementById('warningsContainer');
+            const ctoPowerError = document.getElementById('ctoPowerError');
+            const ontPowerError = document.getElementById('ontPowerError');
+            
+            // Result elements
+            const ontResultItem = document.getElementById('ontResultItem');
+            const ctoResultItem = document.getElementById('ctoResultItem');
+            const degradationResultItem = document.getElementById('degradationResultItem');
+            const ontResultValue = document.getElementById('ontResultValue');
+            const ctoResultValue = document.getElementById('ctoResultValue');
+            const degradationResultValue = document.getElementById('degradationResultValue');
+            const ontResultMessage = document.getElementById('ontResultMessage');
+            const ctoResultMessage = document.getElementById('ctoResultMessage');
+            
+            // Function to ensure the value is negative
+            function ensureNegative(input) {
+                input.addEventListener('change', function() {
+                    const value = parseFloat(this.value);
+                    if (value > 0) {
+                        this.value = -value;
+                        
+                        // Check if the converted negative value is less than -23.50
+                        if (input.id === 'potenciaCTO' && -value < -23.50) {
+                            this.classList.add('bg-red-600', 'text-white');
+                            // Replace window.alert with custom modal
+                            showModal('Potencia en CTO fuera del rango permitido por Perú Fibra (<-23.50)');
+                        }
+                        
+                        // Check if the converted negative value is less than -25.50 for ONT
+                        if (input.id === 'potenciaONT' && -value < -25.50) {
+                            this.classList.add('bg-red-600', 'text-white');
+                            // Replace window.alert with custom modal
+                            showModal('Potencia en ONT fuera del rango permitido por Perú Fibra (<-25.50)');
+                        }
+                    }
+                });
+            }
+            
+            // Add modal elements
+            const customModal = document.getElementById('customModal');
+            const modalContent = document.getElementById('modalContent');
+            const closeModal = document.getElementById('closeModal');
+            const confirmModal = document.getElementById('confirmModal');
+            
+            // Function to show custom modal instead of alert
+            function showModal(message) {
+                modalContent.textContent = message;
+                customModal.classList.remove('hidden');
+            }
+            
+            // Close modal events
+            closeModal.addEventListener('click', () => {
+                customModal.classList.add('hidden');
+            });
+            
+            confirmModal.addEventListener('click', () => {
+                customModal.classList.add('hidden');
+            });
+            
+            // Close modal if clicking outside
+            customModal.addEventListener('click', (e) => {
+                if (e.target === customModal) {
+                    customModal.classList.add('hidden');
+                }
+            });
+            
+            // Apply the negative value constraint to both inputs
+            ensureNegative(potenciaCTOInput);
+            ensureNegative(potenciaONTInput);
+            
+            // Add real-time validation for ONT power value range (after the existing CTO power validation)
+            potenciaONTInput.addEventListener('input', function() {
+                const value = parseFloat(this.value);
+                if (!isNaN(value)) {
+                    const effectiveValue = value > 0 ? -value : value; // Calculate what the value would be if made negative
+                    
+                    if (effectiveValue < -25.50) {
+                        this.classList.add('bg-red-600', 'text-white');
+                        // Replace window.alert with custom modal
+                        showModal('Potencia en ONT fuera del rango permitido por Perú Fibra (<-25.50)');
+                    } else {
+                        this.classList.remove('bg-red-600', 'text-white');
+                    }
+                }
+            });
+            
+            // Also add real-time validation for CTO power value range
+            potenciaCTOInput.addEventListener('input', function() {
+                const value = parseFloat(this.value);
+                if (!isNaN(value)) {
+                    const effectiveValue = value > 0 ? -value : value; // Calculate what the value would be if made negative
+                    
+                    if (effectiveValue < -23.50) {
+                        this.classList.add('bg-red-600', 'text-white');
+                        // Replace window.alert with custom modal
+                        showModal('Potencia en CTO fuera del rango permitido por Perú Fibra (<-23.50)');
+                    } else {
+                        this.classList.remove('bg-red-600', 'text-white');
+                    }
+                }
+            });
+            
+            // Handle form submission
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Clear previous errors
+                ctoPowerError.style.display = 'none';
+                ontPowerError.style.display = 'none';
+                
+                // Get input values
+                const ctoPower = parseFloat(potenciaCTOInput.value);
+                const ontPower = parseFloat(potenciaONTInput.value);
+                
+                // Validate inputs
+                let isValid = true;
+                
+                if (isNaN(ctoPower) || ctoPower < -50 || ctoPower > 50) {
+                    ctoPowerError.textContent = 'La potencia CTO debe estar entre -50 y 50 dBm.';
+                    ctoPowerError.style.display = 'block';
+                    isValid = false;
+                }
+                
+                if (isNaN(ontPower) || ontPower < -50 || ontPower > 50) {
+                    ontPowerError.textContent = 'La potencia ONT debe estar entre -50 y 50 dBm.';
+                    ontPowerError.style.display = 'block';
+                    isValid = false;
+                }
+                
+                if (!isValid) return;
+                
+                // Show loading state with new spinner
+                loadingSpinner.style.display = 'inline-block';
+                calculateBtn.disabled = true;
+                
+                // Simulate API call/calculation
+                setTimeout(function() {
+                    // Calculate degradation
+                    const degradation = ctoPower - ontPower;
+                    
+                    calculateResults(ctoPower, ontPower);
+                    
+                    // Hide loading state
+                    loadingSpinner.style.display = 'none';
+                    calculateBtn.disabled = false;
+                    
+                    // Show results with animation
+                    resultsContainer.style.display = 'block';
+                    resultsContainer.classList.add('animate-fade-in');
+                }, 800);
+            });
+            
+            // Calculate and display results
+            function calculateResults(ctoPower, ontPower) {
+                // Clear previous warnings
+                warningsContainer.innerHTML = '<h3 class="text-amber-700 font-semibold mb-3">Resultados del análisis:</h3>';
+                
+                // Reset classes for the minimalist design
+                ontResultItem.className = 'result-item';
+                ctoResultItem.className = 'result-item';
+                degradationResultItem.className = 'result-item';
+                
+                // Clear text color classes
+                ontResultValue.className = 'text-lg font-medium';
+                ctoResultValue.className = 'text-lg font-medium';
+                degradationResultValue.className = 'text-lg font-medium';
+                ontResultMessage.className = 'mt-2 text-sm';
+                ctoResultMessage.className = 'mt-2 text-sm';
+                
+                // Calculate degradation
+                const degradation = ctoPower - ontPower;
+                
+                // Display CTO power
+                ctoResultValue.textContent = `${ctoPower.toFixed(2)} dBm`;
+                
+                // Display ONT power
+                ontResultValue.textContent = `${ontPower.toFixed(2)} dBm`;
+                
+                // Display degradation
+                degradationResultValue.textContent = `${degradation.toFixed(2)} dBm`;
+                
+                // Set status for ONT power
+                if (ontPower > ctoPower) {
+                    // Add this condition before existing ONT power conditions
+                    ontResultItem.classList.add('danger-item');
+                    ontResultValue.classList.add('text-red-600');
+                    ontResultMessage.textContent = 'Error: La potencia ONT no puede ser mayor que la potencia CTO';
+                    ontResultMessage.classList.add('text-red-600');
+                } else if (ontPower < -25.5) {
+                    ontResultItem.classList.add('danger-item');
+                    ontResultValue.classList.add('text-red-600');
+                    ontResultMessage.textContent = 'Potencia en ONT muy baja (< -25.5 dBm). Revisar conectores, patchcord o roseta';
+                    ontResultMessage.classList.add('text-red-600');
+                } else if (ontPower >= -25.5 && ontPower <= -21) {
+                    ontResultItem.classList.add('warning-item');
+                    ontResultValue.classList.add('text-yellow-600');
+                    ontResultMessage.textContent = 'Potencia ONT en rango de precaución';
+                    ontResultMessage.classList.add('text-yellow-600');
+                } else {
+                    ontResultItem.classList.add('success-item');
+                    ontResultValue.classList.add('text-green-600');
+                    ontResultMessage.textContent = 'Potencia ONT óptima';
+                    ontResultMessage.classList.add('text-green-600');
+                }
+                
+                // Set status for CTO power
+                if (ctoPower < -23.5) {
+                    ctoResultItem.classList.add('danger-item');
+                    ctoResultValue.classList.add('text-red-600');
+                    ctoResultMessage.textContent = 'Potencia en CTO fuera del rango permitido por Perú Fibra (< -23.5 dBm).';
+                    ctoResultMessage.classList.add('text-red-600');
+                } else if (ctoPower >= -23.5 && ctoPower <= -20) {
+                    ctoResultItem.classList.add('warning-item');
+                    ctoResultValue.classList.add('text-yellow-600');
+                    ctoResultMessage.textContent = 'Potencia CTO en rango de precaución';
+                    ctoResultMessage.classList.add('text-yellow-600');
+                } else {
+                    ctoResultItem.classList.add('success-item');
+                    ctoResultValue.classList.add('text-green-600');
+                    ctoResultMessage.textContent = 'Potencia CTO óptima';
+                    ctoResultMessage.classList.add('text-green-600');
+                }
+                
+                // Check if ONT power indicates less loss than CTO
+                if (ontPower >= ctoPower) {
+                    addError('ERROR: La potencia ONT indica menor pérdida que la CTO, revise las mediciones.');
+                }
+                
+                // Evaluate degradation status
+                if (degradation < -2.5 || degradation > 2.5) {
+                    degradationResultItem.classList.add('warning-item');
+                    degradationResultValue.classList.add('text-yellow-600');
+                    
+                    // Clear previous warnings and set the fixed message
+                    warningsContainer.innerHTML = '<h3 class="text-amber-700 font-semibold mb-3">Resultados del análisis:</h3>';
+                    
+                    const warningElement = document.createElement('div');
+                    warningElement.className = 'p-2 mb-2 border-l-4 border-amber-500 bg-amber-100 animate-fade-in';
+                    warningElement.innerHTML = `
+                        <div>
+                            <p class="text-red-600 font-bold mb-2">Advertencia:</p>
+                            <p class="text-amber-700 mb-2">La degradación excede los límites aceptables (2.50 dBm). Se necesitan acciones correctivas:</p>
+                            <ul class="ml-5 text-gray-700">
+                                <li class="mt-1 mb-1 flex items-start">
+                                    <i class="fas fa-tools text-amber-500 mr-2 mt-1"></i>
+                                    <span>Corte y limpieza de fibra en ambos extremos</span>
+                                </li>
+                                <li class="mt-1 mb-1 flex items-start">
+                                    <i class="fas fa-tools text-amber-500 mr-2 mt-1"></i>
+                                    <span>Cambio e inversión de conectores</span>
+                                </li>
+                                <li class="mt-1 mb-1 flex items-start">
+                                    <i class="fas fa-tools text-amber-500 mr-2 mt-1"></i>
+                                    <span>Cambio de patchcord</span>
+                                </li>
+                                <li class="mt-1 mb-1 flex items-start">
+                                    <i class="fas fa-tools text-amber-500 mr-2 mt-1"></i>
+                                    <span>Limpieza de entrada de ONT con alcohol isopropílico</span>
+                                </li>
+                                <li class="mt-1 mb-1 flex items-start">
+                                    <i class="fas fa-tools text-amber-500 mr-2 mt-1"></i>
+                                    <span>Revisar acoplador</span>
+                                </li>
+                                <li class="mt-1 mb-1 flex items-start">
+                                    <i class="fas fa-tools text-amber-500 mr-2 mt-1"></i>
+                                    <span>Reiniciar la ONT</span>
+                                </li>
+                            </ul>
+                        </div>
+                    `;
+                    warningsContainer.appendChild(warningElement);
+                    
+                    // Add new recommendation box when degradation > 2.50
+                    if (degradation > 2.50) {
+                        const targetONT = ctoPower - 2.50;  // Calculate target ONT power based on CTO power
+                        const recommendationBox = document.createElement('div');
+                        recommendationBox.className = 'modern-container p-4 mt-4 border-l-4 border-blue-500 bg-blue-100 animate-fade-in';
+                        recommendationBox.innerHTML = `
+                            <div>
+                                <p class="text-blue-700 font-bold mb-2">Ajuste Recomendado:</p>
+                                <p class="text-blue-600">Para alcanzar una degradación de 2.50 dBm, la potencia ONT debe subir a <span class="font-bold">${targetONT.toFixed(2)} dBm</span>.</p>
+                            </div>
+                        `;
+                        warningsContainer.appendChild(recommendationBox);
+                    }
+                } else {
+                    degradationResultItem.classList.add('success-item');
+                    degradationResultValue.classList.add('text-green-600');
+                    
+                    // Add message for degradation within permitted range
+                    const successElement = document.createElement('div');
+                    successElement.className = 'p-2 mb-2 border-l-4 border-green-500 bg-green-100 animate-fade-in';
+                    successElement.innerHTML = `
+                        <div class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                            <span class="text-green-700">La degradación está dentro del rango permitido.</span>
+                        </div>
+                    `;
+                    warningsContainer.appendChild(successElement);
+                }
+                
+                if (degradation < 0) {
+                    addWarning('Advertencia: La degradación es negativa, esto puede indicar un problema en las mediciones.');
+                }
+            }
+            
+            // Function to add warning messages - updated for new colors and styling
+            function addWarning(message) {
+                const warningElement = document.createElement('div');
+                warningElement.className = 'p-2 mb-2 border-l-4 border-amber-500 bg-amber-100 animate-fade-in';
+                warningElement.innerHTML = `
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-triangle text-amber-500 mr-2"></i>
+                        <span class="text-amber-700">${message}</span>
+                    </div>
+                `;
+                warningsContainer.appendChild(warningElement);
+            }
+            
+            // Function to add error messages - updated for new colors and styling
+            function addError(message) {
+                const errorElement = document.createElement('div');
+                errorElement.className = 'p-2 mb-2 border-l-4 border-red-500 bg-red-100 animate-fade-in';
+                errorElement.innerHTML = `
+                    <div class="flex items-center">
+                        <i class="fas fa-times-circle text-red-500 mr-2"></i>
+                        <span class="text-red-700">${message}</span>
+                    </div>
+                `;
+                warningsContainer.appendChild(errorElement);
+            }
+            
+            // Function to add action items under warnings - updated for new styling
+            function addActionItem(message) {
+                const actionElement = document.createElement('div');
+                actionElement.className = 'ml-5 text-gray-700 mt-1 mb-1 flex items-start';
+                actionElement.innerHTML = `
+                    <i class="fas fa-tools text-amber-500 mr-2 mt-1"></i>
+                    <span>${message}</span>
+                `;
+                warningsContainer.appendChild(actionElement);
+            }
+            
+            // Reset button handler - update to also reset chart
+            resetBtn.addEventListener('click', function() {
+                form.reset();
+                resultsContainer.style.display = 'none';
+                ctoPowerError.style.display = 'none';
+                ontPowerError.style.display = 'none';
+                
+                // Clear warnings but add default message
+                warningsContainer.innerHTML = '<div class="text-amber-700 text-center italic">Los resultados y advertencias aparecerán aquí después del cálculo</div>';
+            });
+        });
+    </script>
+    
+    <!-- Add this modal markup at the end of the body, before the script -->
+    <div id="customModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 max-w-md w-full mx-4 modern-container">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold" style="font-family: 'Orbitron', monospace;">Advertencia</h3>
+                <button id="closeModal" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="modalContent" class="py-2"></div>
+            <div class="mt-6 flex justify-end">
+                <button id="confirmModal" class="modern-button px-4 py-2 rounded">Entendido</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
